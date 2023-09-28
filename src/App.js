@@ -1,23 +1,43 @@
-import logo from './logo.svg';
 import './App.css';
+import Auth from "./components/auth"
+import {db} from "./firebase_config";
+import { useState, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
 
 function App() {
+  const [movie, setMovie]=useState([]);
+
+  const movieRef=collection(db, "movies");
+  useEffect(()=>{
+    const getMovieList=async()=>{
+      try{
+        const data =await getDocs(movieRef);
+        const filtData= data.docs.map((doc)=>({
+          ...doc.data(),
+          id:doc.id
+        }));
+        setMovie(filtData);
+      }catch(err){
+        console.error(err);
+      }
+    };
+    getMovieList();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Auth></Auth>
+      <div>
+      {
+        movie.map((movie)=>(
+          <div>
+            <h1>{movie.title}</h1>
+            <p>Date: {movie.Date}</p>
+            <p>IMDB: {movie.IMDB}</p>
+          </div>
+        ))
+      }
+    </div>
     </div>
   );
 }
